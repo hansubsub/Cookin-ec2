@@ -1,0 +1,15 @@
+@startuml
+box "ViewProfile" #white
+
+participant "UserController" as controller
+participant "Server" as server
+
+controller -> server : 사용자 세션에서 정보 조회
+activate server
+server --> controller : 사용자 정보
+deactivate server
+
+controller --> controller : 사용자 정보 반환
+
+end box
+@enduml

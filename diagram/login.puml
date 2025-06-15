@@ -1,0 +1,48 @@
+@startuml
+box "Login" #white
+
+participant "UserController" as controller
+participant "UserService" as service
+participant "UserRepository" as repository
+participant "User" as entity
+participant "Server" as server
+participant "UserResponse" as responseDto
+
+controller -> service : 로그인 요청 처리
+activate service
+
+service -> repository : 아이디로 사용자 조회
+activate repository
+repository --> service
+deactivate repository
+
+alt 사용자 없음
+    service -> controller : 예외 발생 ("사용자 없음")
+    deactivate service
+else 사용자 존재
+    service -> entity : 비밀번호 확인
+    activate entity
+    entity --> service
+    deactivate entity
+
+    alt 비밀번호 불일치
+        service -> controller : 예외 발생 ("비밀번호 불일치")
+        deactivate service
+    else 비밀번호 일치
+        service -> responseDto : 응답 데이터 생성
+        activate responseDto
+        responseDto --> service
+        deactivate responseDto
+
+        service --> controller : 로그인 성공 응답
+        deactivate service
+
+        controller -> server : 사용자 세션 저장
+        activate server
+        server --> controller
+        deactivate server
+    end
+end
+
+end box
+@enduml

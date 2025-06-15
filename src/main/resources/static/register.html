@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>CookIn Join</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #fff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .container {
+            text-align: center;
+        }
+
+        .logo-title {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 30px;
+        }
+
+        .logo-title img {
+            max-width: 40px;
+            height: auto;
+            margin-right: 10px;
+        }
+
+        .logo-title h1 {
+            font-size: 32px;
+            color: #568a35;
+            margin: 0;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        input {
+            width: 280px;
+            padding: 12px;
+            margin: 8px 0;
+            border: 1px solid #999;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        button {
+            width: 300px;
+            padding: 12px;
+            background-color: #568a35;
+            color: white;
+            border: none;
+            border-radius: 20px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 12px;
+        }
+
+        button:hover {
+            background-color: #466f2b;
+        }
+
+        .join-link {
+            margin-top: 15px;
+            font-size: 14px;
+        }
+
+        .join-link a {
+            text-decoration: none;
+            color: black;
+            border-bottom: 1px solid black;
+        }
+
+        .join-link a:hover {
+            color: #568a35;
+            border-bottom: 1px solid #568a35;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="logo-title">
+        <h1>Join</h1>
+    </div>
+    <form id="register-form">
+        <input type="text" id="username" placeholder="아이디" required>
+        <input type="password" id="password" placeholder="비밀번호" required>
+        <input type="password" id="confirmPassword" placeholder="비밀번호 확인" required>
+        <input type="text" id="name" placeholder="이름" required>
+        <input type="date" id="birth" required>
+        <button type="submit">Join</button>
+    </form>
+    <div class="join-link">
+        <a href="login.html">Back to Login</a>
+    </div>
+</div>
+
+<script>
+    document.getElementById('register-form').addEventListener('submit', async function(e) {
+        e.preventDefault();
+
+        const username = document.getElementById('username').value;
+        const password = document.getElementById('password').value;
+        const confirmPassword = document.getElementById('confirmPassword').value;
+        const name = document.getElementById('name').value;
+        const birth = document.getElementById('birth').value; // id 오타 수정했는지 확인!
+
+        if (password !== confirmPassword) {
+            alert('❗ 비밀번호가 일치하지 않습니다.');
+            return;
+        }
+
+        try {
+            const response = await fetch('/api/users/register', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({ username, password, name, birth })
+            });
+
+            if (response.ok) {
+                alert('회원가입이 완료되었습니다! 로그인 페이지로 이동합니다.');
+                window.location.href = 'login.html';
+            } else {
+                const errorText = await response.text();
+                alert('회원가입 실패: ' + errorText);
+            }
+        } catch (err) {
+            alert('서버 오류 발생: ' + err.message);
+        }
+    });
+</script>
+</body>
+</html>

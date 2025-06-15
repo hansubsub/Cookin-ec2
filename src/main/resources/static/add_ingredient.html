@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>식재료 추가</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 0; background-color: #fff; }
+        .topbar { display: flex; justify-content: space-between; align-items: center; padding: 10px 30px; background-color: white; border-bottom: 2px solid #466f2b; }
+        .topbar-left { display: flex; align-items: center; }
+        .topbar-left img { width: 40px; margin-right: 10px; }
+        .topbar-left span { font-size: 24px; font-weight: bold; color: #466f2b; }
+        .topbar-right button { background: none; border: none; font-size: 16px; margin-left: 20px; cursor: pointer; }
+        .menubar { background-color: #466f2b; display: flex; justify-content: center; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); }
+        .menubar button { background: none; border: none; color: white; font-size: 16px; margin: 10px 100px; cursor: pointer; }
+        .menubar button + button { border-left: 1px solid white; padding-left: 100px; margin-left: 100px; }
+        .content { margin: 50px auto; width: 60%; max-width: 700px; min-height: 500px; text-align: center; box-sizing: border-box; }
+        .content-title { font-size: 26px; color: #466f2b; font-weight: bold; margin-bottom: 50px; }
+        .form-container {
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+        }
+        .form-fields {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+        }
+        .form-group {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .form-group label { width: 150px; text-align: right; margin-right: 10px; font-size: 16px; }
+        .form-group input { width: 300px; padding: 10px; font-size: 16px; border: 1px solid #333; }
+        .add-button {
+            width: 100px;
+            height: 120px;
+            border-radius: 20px;
+            background-color: #466f2b;
+            color: white;
+            font-size: 18px;
+            border: none;
+            cursor: pointer;
+            margin-left: 40px;
+            box-shadow: 3px 3px 6px rgba(0, 0, 0, 0.3);
+        }
+        .add-button:hover { background-color: #365622; }
+    </style>
+</head>
+<body>
+<div class="topbar">
+    <div class="topbar-left">
+        <img src="./images/fridge-icon.png" alt="CookIn 로고">
+        <span>CookIn</span>
+    </div>
+    <div class="topbar-right">
+        <button onclick="location.href='mypage.html'">마이페이지</button>
+        <button onclick="logout()">로그아웃</button>
+    </div>
+</div>
+
+<div class="menubar">
+    <button onclick="location.href='fridge.html'">나의 냉장고</button>
+    <button onclick="location.href='add_ingredient.html'">식재료 추가</button>
+</div>
+
+<div class="content">
+    <div class="content-title">식재료 추가</div>
+    <form id="add-form" class="form-container">
+        <div class="form-fields">
+            <div class="form-group">
+                <label for="name">식재료 이름</label>
+                <input type="text" id="name" placeholder="식재료 이름" required>
+            </div>
+            <div class="form-group">
+                <label for="expirationDate">유통기한</label>
+                <input type="date" id="expirationDate" required>
+            </div>
+        </div>
+        <button type="submit" class="add-button">추가</button>
+    </form>
+</div>
+
+<script>
+    document.getElementById('add-form').addEventListener('submit', async function(e) {
+        e.preventDefault();
+
+        const name = document.getElementById('name').value;
+        const expirationDate = document.getElementById('expirationDate').value;
+
+        try {
+            const response = await fetch('/api/ingredients/add', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({ name, expirationDate })
+            });
+
+            if (response.ok) {
+                alert('식재료가 추가되었습니다!');
+                window.location.href = 'fridge.html';
+            } else {
+                alert('추가 실패. 다시 시도해주세요.');
+            }
+        } catch (error) {
+            console.error('에러 발생:', error);
+            alert('서버 오류가 발생했습니다.');
+        }
+    });
+l
+
+    function logout() {
+        alert('로그아웃되었습니다.');
+        location.href = 'login.html';
+    }
+</script>
+</body>
+</html>

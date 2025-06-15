@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>CookIn Login</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #fff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+
+    .container {
+      text-align: center;
+    }
+
+    .logo-title {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 30px;
+    }
+
+    .logo-title img {
+      max-width: 40px;
+      height: auto;
+      margin-right: 10px;
+    }
+
+    .logo-title h1 {
+      font-size: 32px;
+      color: #568a35;
+      margin: 0;
+    }
+
+    form {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    input {
+      width: 280px;
+      padding: 12px;
+      margin: 8px 0;
+      border: 1px solid #999;
+      border-radius: 4px;
+      font-size: 14px;
+    }
+
+    button {
+      width: 300px;
+      padding: 12px;
+      background-color: #568a35;
+      color: white;
+      border: none;
+      border-radius: 20px;
+      font-size: 16px;
+      cursor: pointer;
+      margin-top: 12px;
+    }
+
+    button:hover {
+      background-color: #466f2b;
+    }
+
+    .join-link {
+      margin-top: 15px;
+      font-size: 14px;
+    }
+
+    .join-link a {
+      text-decoration: none;
+      color: black;
+      border-bottom: 1px solid black;
+    }
+
+    .join-link a:hover {
+      color: #568a35;
+      border-bottom: 1px solid #568a35;
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <div class="logo-title">
+    <img src="./images/fridge-icon.png" alt="CookIn 로고">
+    <h1>CookIn</h1>
+  </div>
+  <form id="login-form">
+    <input type="text" id="userId" placeholder="user id" required>
+    <input type="password" id="password" placeholder="password" required>
+    <button type="submit">Login</button>
+  </form>
+  <div class="join-link">
+    <a href="register.html">Join</a>
+  </div>
+</div>
+
+<script>
+  document.getElementById('login-form').addEventListener('submit', async function(e) {
+    e.preventDefault();
+
+    const username = document.getElementById('userId').value;
+    const password = document.getElementById('password').value;
+
+    try {
+      const response = await fetch('/api/users/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ username, password })
+      });
+
+      if (response.ok) {
+        // ✅ 로그인 성공 플래그만 저장
+        sessionStorage.setItem("loginSuccess", "true");
+        window.location.href = 'fridge.html';
+      } else {
+        alert('로그인 실패');
+      }
+    } catch (error) {
+      alert('서버 오류 발생');
+    }
+  });
+</script>
+</body>
+</html>

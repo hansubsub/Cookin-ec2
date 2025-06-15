@@ -1,0 +1,32 @@
+@startuml
+box "Edit Ingredient" #white
+
+participant "IngredientController" as controller
+participant "IngredientService" as service
+participant "IngredientRepository" as ingredientRepo
+participant "IngredientResponse" as responseDto
+
+controller -> service : 재료 수정 요청 (ID, 변경 정보)
+activate service
+
+service -> ingredientRepo : ID로 재료 조회
+activate ingredientRepo
+ingredientRepo --> service
+deactivate ingredientRepo
+
+alt 재료 없음
+    service -> controller : 예외 발생 ("재료 없음")
+    deactivate service
+else 재료 있음
+    service -> service : 이름, 유통기한 수정
+    service -> responseDto : 응답 DTO 생성
+    activate responseDto
+    responseDto --> service
+    deactivate responseDto
+
+    service --> controller : 수정된 재료 정보 반환
+    deactivate service
+end
+
+end box
+@enduml

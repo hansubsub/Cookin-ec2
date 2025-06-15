@@ -1,0 +1,46 @@
+@startuml
+box "AddIngredient" #white
+
+participant "IngredientController" as controller
+participant "Server" as server
+participant "IngredientService" as service
+participant "UserRepository" as userRepo
+participant "IngredientRepository" as ingredientRepo
+participant "User" as userEntity
+participant "Ingredient" as ingredientEntity
+participant "IngredientResponse" as responseDto
+
+controller -> server : 사용자 세션에서 정보 조회
+activate server
+server --> controller : 사용자 정보
+deactivate server
+
+controller -> service : 식재료 등록 요청
+activate service
+
+service -> userRepo : 사용자 ID로 사용자 조회
+activate userRepo
+userRepo --> service
+deactivate userRepo
+
+service -> ingredientEntity : 재료 엔티티 생성 (builder)
+activate ingredientEntity
+ingredientEntity -> ingredientEntity : 이름 설정\n유통기한 설정\n사용자 설정
+ingredientEntity --> service : 생성된 재료 객체 반환
+deactivate ingredientEntity
+
+service -> ingredientRepo : 재료 저장
+activate ingredientRepo
+ingredientRepo --> service
+deactivate ingredientRepo
+
+service -> responseDto : 응답 DTO 생성
+activate responseDto
+responseDto --> service
+deactivate responseDto
+
+service --> controller : 등록된 재료 정보 반환
+deactivate service
+
+end box
+@enduml

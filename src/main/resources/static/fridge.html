@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>나의 냉장고</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 0; background-color: #fff; }
+    .topbar {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 10px 30px; background-color: white; border-bottom: 2px solid #466f2b;
+    }
+    .topbar-left { display: flex; align-items: center; }
+    .topbar-left img { width: 40px; margin-right: 10px; }
+    .topbar-left span { font-size: 24px; font-weight: bold; color: #466f2b; }
+    .topbar-right button {
+      background: none; border: none; font-size: 16px; margin-left: 20px; cursor: pointer;
+    }
+    .menubar {
+      background-color: #466f2b; display: flex; justify-content: center;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+    .menubar button {
+      background: none; border: none; color: white; font-size: 16px; margin: 10px 100px; cursor: pointer;
+    }
+    .menubar button + button {
+      border-left: 1px solid white; padding-left: 100px; margin-left: 100px;
+    }
+
+    .content {
+      margin: 30px auto; width: 60%; max-width: 700px; min-height: 500px;
+      border: 2px solid #333; padding: 30px; text-align: center; box-sizing: border-box;
+    }
+
+    .content-title {
+      font-size: 26px; color: #466f2b; font-weight: bold; margin-bottom: 30px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      table-layout: fixed; /* ✅ 열 너비 고정 */
+    }
+
+    th, td {
+      border: 1px solid #ccc;
+      padding: 12px;
+      font-size: 16px;
+      text-align: center;
+    }
+
+    th {
+      background-color: #f2f2f2;
+    }
+
+    /* ✅ 수정/삭제 버튼 열만 너비 좁게 설정 */
+    th:nth-child(4), td:nth-child(4) {
+      width: 80px;
+    }
+
+    .button-group {
+      display: flex;
+      justify-content: center;
+      gap: 4px;
+    }
+
+    .edit-btn, .delete-btn {
+      font-size: 12px;
+      padding: 4px 6px;
+      border-radius: 6px;
+      border: none;
+      cursor: pointer;
+    }
+
+    .edit-btn {
+      background-color: #68a043;
+      color: white;
+    }
+
+    .delete-btn {
+      background-color: #aaa;
+      color: white;
+    }
+
+    .popup-overlay {
+      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      background-color: rgba(0,0,0,0.5);
+      display: none; justify-content: center; align-items: center;
+      z-index: 1000;
+    }
+
+    .popup {
+      background-color: white;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+      text-align: center;
+      width: 400px;
+    }
+
+    .popup button {
+      margin-top: 15px;
+      padding: 8px 16px;
+      background-color: #568a35;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    .popup button:hover {
+      background-color: #466f2b;
+    }
+  </style>
+</head>
+<body>
+<div class="topbar">
+  <div class="topbar-left">
+    <img src="./images/fridge-icon.png" alt="CookIn 로고">
+    <span>CookIn</span>
+  </div>
+  <div class="topbar-right">
+    <button onclick="location.href='mypage.html'">마이페이지</button>
+    <button onclick="logout()">로그아웃</button>
+  </div>
+</div>
+
+<div class="menubar">
+  <button onclick="location.href='fridge.html'">나의 냉장고</button>
+  <button onclick="location.href='add_ingredient.html'">식재료 추가</button>
+</div>
+
+<div class="content">
+  <div class="content-title">나의 냉장고</div>
+  <table>
+    <thead>
+    <tr>
+      <th>식재료 이름</th>
+      <th>남은 일수</th>
+      <th>유통기한</th>
+      <th></th>
+    </tr>
+    </thead>
+    <tbody id="ingredient-table-body"></tbody>
+  </table>
+</div>
+
+<div id="expire-popup" class="popup-overlay">
+  <div class="popup">
+    <div id="expire-message">⚠️ 유통기한 임박 재료가 있습니다.</div>
+    <button onclick="closeExpirePopup()">닫기</button>
+  </div>
+</div>
+
+<script>
+  function closeExpirePopup() {
+    document.getElementById('expire-popup').style.display = 'none';
+  }
+
+  async function loadIngredients() {
+    const response = await fetch('/api/ingredients/user', { credentials: 'include' });
+    const data = await response.json();
+    data.sort((a, b) => new Date(a.expirationDate) - new Date(b.expirationDate));
+
+    const tbody = document.getElementById('ingredient-table-body');
+    tbody.innerHTML = '';
+
+    data.forEach(item => {
+      const today = new Date();
+      const expireDate = new Date(item.expirationDate);
+      today.setHours(0, 0, 0, 0);
+      expireDate.setHours(0, 0, 0, 0);
+      const diffDays = Math.floor((expireDate - today) / (1000 * 60 * 60 * 24));
+
+      const row = document.createElement('tr');
+      row.innerHTML = `
+        <td>${item.name}</td>
+        <td>D-${diffDays}</td>
+        <td>${item.expirationDate.replace(/-/g, '.')}</td>
+        <td class="button-group">
+          <button class="edit-btn" onclick="editIngredient(${item.id})">수정</button>
+          <button class="delete-btn" onclick="deleteIngredient(${item.id})">삭제</button>
+        </td>
+      `;
+      tbody.appendChild(row);
+    });
+  }
+
+  function editIngredient(id) {
+    window.location.href = `edit.html?ingredientId=${id}`;
+  }
+
+  async function deleteIngredient(id) {
+    if (!confirm('정말 삭제하시겠습니까?')) return;
+
+    const res = await fetch(`/api/ingredients/delete/${id}`, {
+      method: 'DELETE',
+      credentials: 'include'
+    });
+
+    if (res.ok) {
+      alert('삭제 완료');
+      loadIngredients();
+    } else {
+      alert('삭제 실패');
+    }
+  }
+
+  async function loadExpiringAlertPopup() {
+    if (sessionStorage.getItem("loginSuccess") !== "true") return;
+
+    try {
+      const res = await fetch('/api/ingredients/expiring', { credentials: 'include' });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.length > 0) {
+          const msg = data.map(i => `${i.name} (D-${getDday(i.expirationDate)})`).join(', ');
+          document.getElementById("expire-message").innerText = `⚠️ 유통기한 임박 재료: ${msg}`;
+          document.getElementById("expire-popup").style.display = "flex";
+        }
+      }
+    } catch (err) {
+      console.error("유통기한 임박 재료 팝업 오류:", err);
+    }
+
+    sessionStorage.removeItem("loginSuccess");
+  }
+
+  function getDday(dateStr) {
+    const today = new Date();
+    const target = new Date(dateStr);
+    today.setHours(0, 0, 0, 0);
+    target.setHours(0, 0, 0, 0);
+    return Math.floor((target - today) / (1000 * 60 * 60 * 24));
+  }
+
+  function logout() {
+    fetch('/api/users/logout', {
+      method: 'POST',
+      credentials: 'include'
+    })
+            .then(res => {
+              if (res.ok) {
+                alert('로그아웃되었습니다.');
+                location.href = 'login.html';
+              } else {
+                alert('로그아웃 실패');
+              }
+            })
+            .catch(err => {
+              console.error("로그아웃 에러:", err);
+              alert("서버 오류");
+            });
+  }
+
+  window.onload = () => {
+    loadIngredients();
+    loadExpiringAlertPopup();
+  };
+</script>
+</body>
+</html>

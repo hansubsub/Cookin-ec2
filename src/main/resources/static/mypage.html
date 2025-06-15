@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>My Page - CookIn</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #fff;
+            margin: 0;
+        }
+
+        .topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 30px;
+            background-color: white;
+            border-bottom: 2px solid #466f2b;
+        }
+
+        .topbar-left {
+            display: flex;
+            align-items: center;
+        }
+
+        .topbar-left img {
+            width: 40px;
+            margin-right: 10px;
+        }
+
+        .topbar-left span {
+            font-size: 24px;
+            font-weight: bold;
+            color: #466f2b;
+        }
+
+        .topbar-right button {
+            background: none;
+            border: none;
+            font-size: 16px;
+            margin-left: 20px;
+            cursor: pointer;
+        }
+
+        .menubar {
+            background-color: #466f2b;
+            display: flex;
+            justify-content: center;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .menubar button {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 16px;
+            margin: 10px 100px;
+            cursor: pointer;
+        }
+
+        .menubar button + button {
+            border-left: 1px solid white;
+            padding-left: 100px;
+            margin-left: 100px;
+        }
+
+        .content {
+            margin: 50px auto;
+            width: 60%;
+            max-width: 700px;
+            border: 2px solid #466f2b;
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            font-size: 28px;
+            color: #568a35;
+            margin-bottom: 30px;
+        }
+
+        .info {
+            font-size: 16px;
+            margin-bottom: 8px;
+        }
+    </style>
+</head>
+<body>
+<div class="topbar">
+    <div class="topbar-left">
+        <img src="./images/fridge-icon.png" alt="CookIn 로고">
+        <span>CookIn</span>
+    </div>
+    <div class="topbar-right">
+        <button onclick="location.href='mypage.html'">마이페이지</button>
+        <button onclick="logout()">로그아웃</button>
+    </div>
+</div>
+
+<div class="menubar">
+    <button onclick="location.href='fridge.html'">나의 냉장고</button>
+    <button onclick="location.href='add_ingredient.html'">식재료 추가</button>
+</div>
+
+<div class="content">
+    <h1>My Page</h1>
+    <div class="info" id="name">이름: </div>
+    <div class="info" id="username">아이디: </div>
+    <div class="info" id="birth">생년월일: </div>
+</div>
+
+<script>
+    async function loadProfile() {
+        try {
+            const res = await fetch('/api/users/profile', {
+                credentials: 'include'
+            });
+            if (!res.ok) throw new Error('불러오기 실패');
+
+            const user = await res.json();
+
+            document.getElementById('name').innerText = `이름: ${user.name}`;
+            document.getElementById('username').innerText = `아이디: ${user.username}`;
+            document.getElementById('birth').innerText = `생년월일: ${user.birth}`;
+        } catch (err) {
+            alert('사용자 정보를 불러오지 못했습니다.');
+        }
+    }
+
+    function logout() {
+        fetch('/api/users/logout', {
+            method: 'POST',
+            credentials: 'include'
+        })
+            .then(res => {
+                if (res.ok) {
+                    alert('로그아웃되었습니다.');
+                    location.href = 'login.html';
+                } else {
+                    alert('로그아웃 실패');
+                }
+            })
+            .catch(err => {
+                console.error("로그아웃 에러:", err);
+                alert("서버 오류");
+            });
+    }
+
+    window.onload = loadProfile;
+</script>
+</body>
+</html>

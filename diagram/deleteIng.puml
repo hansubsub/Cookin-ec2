@@ -1,0 +1,30 @@
+@startuml
+box "DeleteIngredient" #white
+
+participant "IngredientController" as controller
+participant "IngredientService" as service
+participant "IngredientRepository" as ingredientRepo
+
+controller -> service : 재료 삭제 요청
+activate service
+
+service -> ingredientRepo : ID로 재료 조회
+activate ingredientRepo
+ingredientRepo --> service
+deactivate ingredientRepo
+
+alt 재료 없음
+    service -> controller : 예외 발생 ("재료 없음")
+    deactivate service
+else 재료 있음
+    service -> ingredientRepo : 재료 삭제
+    activate ingredientRepo
+    ingredientRepo --> service
+    deactivate ingredientRepo
+
+    service --> controller : 삭제 완료 메시지
+    deactivate service
+end
+
+end box
+@enduml

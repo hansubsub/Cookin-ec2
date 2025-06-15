@@ -1,0 +1,33 @@
+@startuml
+box "Join" #white
+
+participant "UserController" as controller
+participant "UserService" as service
+participant "UserRepository" as repository
+participant "User" as entity
+participant "UserResponse" as responseDto
+
+controller -> service : 회원가입 요청
+activate service
+
+service -> entity : 새 사용자 만들기
+activate entity
+entity -> entity : 아이디 설정\n비밀번호 설정\n이름 설정\n생일 설정
+entity --> service : 생성된 사용자 객체 반환
+deactivate entity
+
+service -> repository : 사용자 저장
+activate repository
+repository --> service : 저장된 사용자 반환
+deactivate repository
+
+service -> responseDto : 응답 객체 생성
+activate responseDto
+responseDto --> service : 응답 반환
+deactivate responseDto
+
+service --> controller : 사용자 정보 응답
+deactivate service
+
+end box
+@enduml
